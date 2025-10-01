@@ -133,17 +133,15 @@ $errorStats = getErrorsStatistics($logFile);
 
 ?>
 <!DOCTYPE html>
-<html <?php language_attributes(); ?>>
+<html lang="ru">
 
 <head>
-    <meta charset="<?php bloginfo('charset'); ?>">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Статистика защиты форм - <?php bloginfo('name'); ?></title>
+    <title>Статистика защиты форм</title>
 
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <?php wp_head(); ?>
 </head>
 
 <body class="bg-light">
@@ -305,8 +303,6 @@ $errorStats = getErrorsStatistics($logFile);
 
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    <?php wp_footer(); ?>
 </body>
 
 </html>
