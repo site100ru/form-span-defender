@@ -1,3 +1,9 @@
+name: Deploy form-span-defender
+
+on:
+  push:
+    branches: [main]
+
 jobs:
   deploy-to-first-host:
     runs-on: ubuntu-latest
