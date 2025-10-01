@@ -3,7 +3,7 @@ if (!session_id()) {
     session_start();
 }
 
-$display = isset($_SESSION['win']) && $_SESSION['win'] == 1 ? 'block' : 'none';
+$display = isset($_SESSION['win']) && $_SESSION['win'] == 'block' ? 'block' : 'none';
 $message = isset($_SESSION['recaptcha']) ? $_SESSION['recaptcha'] : '';
 ?>
 <!DOCTYPE html>
@@ -92,7 +92,7 @@ $message = isset($_SESSION['recaptcha']) ? $_SESSION['recaptcha'] : '';
     <!-- Callback Modal -->
     <div class="modal fade" id="callbackModal" tabindex="-1" aria-labelledby="callbackModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <form method="post" action="<?php echo get_stylesheet_directory_uri(); ?>/mails/callback-mail.php" class="modal-content protected-form">
+            <form method="post" action="mails/callback-mail.php" class="modal-content protected-form">
                 <div class="modal-header">
                     <h5 class="modal-title" id="callbackModalLabel">Обратный звонок</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -146,12 +146,11 @@ $message = isset($_SESSION['recaptcha']) ? $_SESSION['recaptcha'] : '';
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-
     <!-- Маска телефона -->
-    <script src="<?php echo get_stylesheet_directory_uri(); ?>/js/tel.js"></script>
+    <script src="js/tel.js"></script>
 
     <!-- Скрипт защиты формы -->
-    <script src="<?php echo get_stylesheet_directory_uri(); ?>/js/form-protection.js"></script>
+    <script src="js/form-protection.js"></script>
 </body>
 
 </html>

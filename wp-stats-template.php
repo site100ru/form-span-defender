@@ -13,11 +13,11 @@
  * Теперь только те, кто знает пароль, смогут просматривать статистику
  */
 
-// Проверяем, что страница защищена паролем
-if (post_password_required()) {
-    echo get_the_password_form();
-    exit;
-}
+// // Проверяем, что страница защищена паролем
+// if (post_password_required()) {
+//     echo get_the_password_form();
+//     exit;
+// }
 
 // Путь к файлу логов (настройте под вашу структуру)
 $logFile = get_template_directory() . '/mails/spam_log.txt';
