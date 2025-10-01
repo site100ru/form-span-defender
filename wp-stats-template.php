@@ -230,7 +230,7 @@ $errorStats = getErrorsStatistics($logFile);
                     ?>
                         <div class="mb-3">
                             <div class="d-flex justify-content-between align-items-center mb-1">
-                                <strong><?php echo esc_html($error); ?></strong>
+                                <strong><?php echo htmlspecialchars($error); ?></strong>
                                 <span class="text-muted small">(<?php echo $count; ?> раз)</span>
                             </div>
                             <div class="progress">
@@ -265,7 +265,7 @@ $errorStats = getErrorsStatistics($logFile);
                             <tbody>
                                 <?php foreach ($recentAttempts as $attempt): ?>
                                     <tr>
-                                        <td><?php echo esc_html($attempt['timestamp']); ?></td>
+                                        <td><?php echo htmlspecialchars($attempt['timestamp']); ?></td>
                                         <td>
                                             <?php if ($attempt['is_spam']): ?>
                                                 <span class="badge bg-danger">СПАМ</span>
@@ -273,14 +273,14 @@ $errorStats = getErrorsStatistics($logFile);
                                                 <span class="badge bg-success">OK</span>
                                             <?php endif; ?>
                                         </td>
-                                        <td><?php echo esc_html($attempt['data']['user_name'] ?? '-'); ?></td>
-                                        <td><?php echo esc_html($attempt['data']['tel'] ?? '-'); ?></td>
-                                        <td><?php echo esc_html($attempt['data']['email'] ?? '-'); ?></td>
+                                        <td><?php echo htmlspecialchars($attempt['data']['user_name'] ?? '-'); ?></td>
+                                        <td><?php echo htmlspecialchars($attempt['data']['tel'] ?? '-'); ?></td>
+                                        <td><?php echo htmlspecialchars($attempt['data']['email'] ?? '-'); ?></td>
                                         <td>
                                             <?php if (!empty($attempt['errors'])): ?>
                                                 <ul class="list-unstyled mb-0 small text-danger">
                                                     <?php foreach ($attempt['errors'] as $error): ?>
-                                                        <li><?php echo esc_html($error); ?></li>
+                                                        <li><?php echo htmlspecialchars($error); ?></li>
                                                     <?php endforeach; ?>
                                                 </ul>
                                             <?php else: ?>
