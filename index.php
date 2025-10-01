@@ -146,9 +146,6 @@ $message = isset($_SESSION['recaptcha']) ? $_SESSION['recaptcha'] : '';
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Маска телефона -->
-    <script src="js/tel.js"></script>
-
     <!-- Скрипт защиты формы -->
     <script src="js/form-protection.js"></script>
 </body>
