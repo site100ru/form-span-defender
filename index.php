@@ -5,7 +5,7 @@ if (!session_id()) {
 
 $display = isset($_SESSION['win']) && $_SESSION['win'] == 'block' ? 'block' : 'none';
 $message = isset($_SESSION['recaptcha']) ? $_SESSION['recaptcha'] : '';
-test 2
+echo 'test5';
 ?>
 
 
