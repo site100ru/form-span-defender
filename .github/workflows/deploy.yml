@@ -19,5 +19,6 @@ jobs:
             #git clone git@github.com:site100ru/form-span-defender.git .
             
             cd /var/www/u1538455/data/www/site100.ru/projects/form-span-defender
-            git stash
-            git pull origin main --force
+            git fetch origin
+            git reset --hard origin/main
+            git clean -fd  # удалит неотслеживаемые файлы
