@@ -10,44 +10,43 @@ $message = isset($_SESSION['recaptcha']) ? $_SESSION['recaptcha'] : '';
 
 <!DOCTYPE html>
 <html lang="ru">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Тест формы</title>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Тест формы</title>
+		<!-- Bootstrap CSS -->
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+		<style>
+			/* Стили для модального сообщения */
+			#background-msg {
+				display: none;
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background: rgba(0, 0, 0, 0.7);
+				z-index: 9998;
+			}
 
-    <style>
-        /* Стили для модального сообщения */
-        #background-msg {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 9998;
-        }
+			#message {
+				position: fixed;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+				z-index: 9999;
+			}
 
-        #message {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 9999;
-        }
-
-        #message p {
-            margin: 0;
-            font-size: 18px;
-            line-height: 1.5;
-            color: #fff;
-        }
-    </style>
-</head>
+			#message p {
+				margin: 0;
+				font-size: 18px;
+				line-height: 1.5;
+				color: #fff;
+			}
+		</style>
+	</head>
 
 <body>
     <?php
