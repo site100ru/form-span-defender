@@ -148,6 +148,12 @@ $message = isset($_SESSION['recaptcha']) ? $_SESSION['recaptcha'] : '';
 
     <!-- Скрипт защиты формы -->
     <script src="js/form-protection.js"></script>
+    <script src="js/inputmask.min.js"></script>
+    <script>
+        var telMask = document.getElementsByClassName("telMask");
+        var im = new Inputmask("+7(999)999-99-99");
+        im.mask(telMask);
+    </script>
 </body>
 
 </html>
