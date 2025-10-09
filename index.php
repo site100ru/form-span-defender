@@ -130,9 +130,6 @@ $message = isset($_SESSION['recaptcha']) ? $_SESSION['recaptcha'] : '';
 
                     <!-- Скрытые поля безопасности -->
                     <input type="hidden" name="form_timestamp" value="" />
-
-                    <!-- Блок ошибок -->
-                    <div class="alert alert-danger d-none form-errors"></div>
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn-lg btn btn-primary mx-auto">

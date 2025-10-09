@@ -54,24 +54,19 @@ const RUSSIAN_OPERATOR_CODES = [
  *    - Не является ли заполенное поле пустой строкой после удаления пробелов
  * 5. Для каждого незаполненного поля добавляет сообщение об ошибке
  */
-function validateRequiredFields(formData) {
+function validateRequired(value) {
     if (!VALIDATION_CONFIG.requireAllFields) {
         return { valid: true };
     }
 
-    const errors = [];
-    const requiredFields = ['user_name', 'tel', 'email'];
+    if (!value || value.trim() === '') {
+        return {
+            valid: false,
+            error: 'Это поле обязательно для заполнения'
+        };
+    }
 
-    requiredFields.forEach(function (field) {
-        if (!formData.get(field) || formData.get(field).trim() === '') {
-            errors.push('Поле "' + getFieldLabel(field) + '" обязательно для заполнения');
-        }
-    });
-
-    return {
-        valid: errors.length === 0,
-        errors: errors
-    };
+    return { valid: true };
 }
 
 /**
@@ -90,7 +85,7 @@ function validateRequiredFields(formData) {
  * 5. Если найдены недопустимые символы (латиница, цифры и т.д.) - возвращает ошибку
  */
 function validateNameCyrillic(name) {
-    if (!VALIDATION_CONFIG.nameOnlyCyrillic) {
+    if (!VALIDATION_CONFIG.nameOnlyCyrillic || !name || name.trim() === '') {
         return { valid: true };
     }
 
@@ -99,7 +94,16 @@ function validateNameCyrillic(name) {
     if (!cyrillicPattern.test(name)) {
         return {
             valid: false,
-            errors: ['Имя должно быть написано только кириллицей (русские буквы)']
+            error: 'Имя должно быть написано только кириллицей (русские буквы)'
+        };
+    }
+
+    const lettersOnly = name.replace(/[^А-Яа-яЁё]/g, '');
+
+    if (lettersOnly.length < 2) {
+        return {
+            valid: false,
+            error: 'Имя должно содержать минимум 2 буквы'
         };
     }
 
@@ -126,24 +130,34 @@ function validateNameCyrillic(name) {
  * 6. Если структура неверная - возвращает ошибку о некорректном формате
  */
 function validateEmailLatin(email) {
+    if (!email || email.trim() === '') {
+        return { valid: true };
+    }
+
     if (!VALIDATION_CONFIG.emailOnlyLatin) {
         return { valid: true };
     }
 
-    const latinPattern = /^[a-zA-Z0-9@._\-]+$/;
-
-    if (!latinPattern.test(email)) {
+    if (/[а-яА-ЯёЁ]/.test(email)) {
         return {
             valid: false,
-            errors: ['Email должен содержать только латинские буквы']
+            error: 'Email должен содержать только латинские буквы'
         };
     }
 
+    if (/xn--/.test(email)) {
+        return {
+            valid: false,
+            error: 'Email должен содержать только латинские буквы'
+        };
+    }
+
+    // Базовая проверка формата email
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailPattern.test(email)) {
         return {
             valid: false,
-            errors: ['Некорректный формат email']
+            error: 'Введите корректный email адрес'
         };
     }
 
@@ -165,6 +179,10 @@ function validateEmailLatin(email) {
  *    Защита от спам-ботов, которые часто используют такие номера
  */
 function validatePhoneSameDigits(phone) {
+    if (!phone || phone.trim() === '') {
+        return { valid: true };
+    }
+
     if (!VALIDATION_CONFIG.phoneSameDigits) {
         return { valid: true };
     }
@@ -175,7 +193,7 @@ function validatePhoneSameDigits(phone) {
     if (sameDigitsPattern.test(digitsOnly)) {
         return {
             valid: false,
-            errors: ['Телефон не может содержать 6 одинаковых цифр подряд']
+            error: 'Телефон не может содержать 6 одинаковых цифр подряд'
         };
     }
 
@@ -207,6 +225,10 @@ function validatePhoneSameDigits(phone) {
  *    Защита от спам-ботов, которые используют простые последовательности
  */
 function validatePhoneSequentialDigits(phone) {
+    if (!phone || phone.trim() === '') {
+        return { valid: true };
+    }
+
     if (!VALIDATION_CONFIG.phoneSequentialDigits) {
         return { valid: true };
     }
@@ -235,7 +257,7 @@ function validatePhoneSequentialDigits(phone) {
         if (isAscending || isDescending) {
             return {
                 valid: false,
-                errors: ['Телефон не может содержать 6 цифр подряд по порядку']
+                error: 'Телефон не может содержать 6 цифр подряд по порядку'
             };
         }
     }
@@ -263,7 +285,11 @@ function validatePhoneSequentialDigits(phone) {
  * 6. Если найдены недопустимые символы (латиница, цифры) - возвращает ошибку
  */
 function validateCityCyrillic(city) {
-    if (!VALIDATION_CONFIG.cityOnlyCyrillic || !city || city.trim() === '') {
+    if (!city || city.trim() === '') {
+        return { valid: true };
+    }
+
+    if (!VALIDATION_CONFIG.cityOnlyCyrillic) {
         return { valid: true };
     }
 
@@ -272,7 +298,7 @@ function validateCityCyrillic(city) {
     if (!cyrillicPattern.test(city)) {
         return {
             valid: false,
-            errors: ['Город должен быть написан только кириллицей']
+            error: 'Город должен быть написан только кириллицей'
         };
     }
 
@@ -298,18 +324,27 @@ function validateCityCyrillic(city) {
  *    Защита от спама с иностранных номеров
  */
 function validateRussianOperator(phone) {
+    if (!phone || phone.trim() === '') {
+        return { valid: true };
+    }
+
     if (!VALIDATION_CONFIG.phoneRussianOperators) {
         return { valid: true };
     }
 
     const digitsOnly = phone.replace(/\D/g, '');
+    
+    // Проверяем только если введено достаточно цифр
+    if (digitsOnly.length < 4) {
+        return { valid: true };
+    }
 
     const operatorCode = digitsOnly.substr(1, 3);
 
     if (RUSSIAN_OPERATOR_CODES.indexOf(operatorCode) === -1) {
         return {
             valid: false,
-            errors: ['Указан некорректный код российского оператора']
+            error: 'Указан некорректный код российского оператора'
         };
     }
 
@@ -367,6 +402,10 @@ function validateHoneypotName(formData) {
  * 6. Если обе проверки пройдены - возвращает успешный результат
  */
 function validatePhoneFullLength(phone) {
+    if (!phone || phone.trim() === '') {
+        return { valid: true };
+    }
+
     if (!VALIDATION_CONFIG.phoneFullLength) {
         return { valid: true };
     }
@@ -376,14 +415,14 @@ function validatePhoneFullLength(phone) {
     if (digitsOnly.length !== 11) {
         return {
             valid: false,
-            errors: ['Введите полный номер телефона (11 цифр)']
+            error: 'Введите полный номер телефона (11 цифр)'
         };
     }
 
     if (digitsOnly[0] !== '7' && digitsOnly[0] !== '8') {
         return {
             valid: false,
-            errors: ['Номер должен начинаться с +7 или 8']
+            error: 'Номер должен начинаться с +7 или 8'
         };
     }
 
@@ -425,7 +464,7 @@ function validateFormTimestamp(timestamp) {
     if (!formOpenTime) {
         return {
             valid: false,
-            errors: ['Ошибка валидации формы']
+            error: 'Ошибка валидации формы'
         };
     }
 
@@ -434,14 +473,14 @@ function validateFormTimestamp(timestamp) {
     if (timeSpent < 2) {
         return {
             valid: false,
-            errors: ['Форма заполнена слишком быстро']
+            error: 'Форма заполнена слишком быстро'
         };
     }
 
     if (timeSpent > 3600) {
         return {
             valid: false,
-            errors: ['Форма устарела, пожалуйста, обновите страницу']
+            error: 'Форма устарела, пожалуйста, обновите страницу'
         };
     }
 
@@ -449,177 +488,220 @@ function validateFormTimestamp(timestamp) {
 }
 
 // =============================================================================
-// ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+// ФУНКЦИИ ОТОБРАЖЕНИЯ ОШИБОК
 // =============================================================================
 
 /**
- * Преобразуем поля формы для отправки на почту:
- * 
- * 'user_name' → 'Имя'
- * 'tel' → 'Телефон'
- * 'email' → 'Email'
- * 'city' → 'Город'
- * 
- * Можно добавить любые другие поля, например:
- * 'company' → 'Компания'
- * 'message' → 'Сообщение'
- * 'address' → 'Адрес'
- * 'position' → 'Должность'
- * 
- * Если поле не найдено в справочнике - возвращает исходное имя.
+ * Показывает ошибку для конкретного поля
  */
-function getFieldLabel(fieldName) {
-    const labels = {
-        'user_name': 'Имя',
-        'tel': 'Телефон',
-        'email': 'Email',
-        'city': 'Город'
-        // Добавьте свои поля здесь:
-        // 'company': 'Компания',
-        // 'message': 'Сообщение',
-    };
-    return labels[fieldName] || fieldName;
+function showFieldError(field, errorMessage) {
+    // Ищем существующий блок ошибки или создаем новый
+    let errorBlock = field.parentElement.querySelector('.field-error');
+    
+    if (!errorBlock) {
+        errorBlock = document.createElement('div');
+        errorBlock.className = 'field-error';
+        errorBlock.style.color = '#dc3545';
+        errorBlock.style.fontSize = '0.875em';
+        errorBlock.style.marginTop = '0.25rem';
+        field.parentElement.appendChild(errorBlock);
+    }
+
+    errorBlock.textContent = errorMessage;
+    errorBlock.style.display = 'block';
 }
 
 /**
- * Отображает сообщения об ошибках валидации для конкретной формы
- * 
- * Логика работы:
- * 1. Ищет специальный блок для вывода ошибок внутри формы:
- * 
- *  // =============================================================================
- *    - Блок должен иметь класс 'form-errors' 
- *  // =============================================================================
- * 
- *    - Обычно это <div class="form-errors d-none"></div>
- * 2. Если блок найден:
- *    - Объединяет все сообщения об ошибках через <br> (перенос строки в HTML)
- *    - Вставляет HTML с ошибками в блок: errorBlock.innerHTML
- *    - Удаляет класс 'd-none' чтобы показать блок
- * 3. Если блок не найден:
- *    - Показывает стандартный браузерный alert()
- *    - Объединяет ошибки через \n (перенос строки в alert)
- *    - Менее красиво, но работает везде
+ * Убирает ошибку с конкретного поля
  */
-function showErrorsForForm(form, errors) {
-    const errorBlock = form.querySelector('.form-errors');
+function hideFieldError(field) {
+    const errorBlock = field.parentElement.querySelector('.field-error');
     if (errorBlock) {
-        errorBlock.innerHTML = errors.join('<br>');
-        errorBlock.classList.remove('d-none');
-    } else {
-        alert(errors.join('\n'));
+        errorBlock.style.display = 'none';
     }
 }
 
 /**
- * Скрывает блок с сообщениями об ошибках валидации
- * 
- * Логика работы:
- * 1. Ищет специальный блок для вывода ошибок внутри формы:
- *
- *  // =============================================================================
- *    - Блок должен иметь класс 'form-errors'
- *
- *  // =============================================================================
- *    - Обычно это <div class="form-errors d-none"></div>
- * 2. Если блок найден:
- *    - Добавляет класс 'd-none' для скрытия блока
- *    - Блок остается в DOM, но становится невидимым
- * 3. Если блок не найден:
- *    - Ничего не делает (нет ошибок для скрытия)
- * 4. Используется в двух случаях:
- *    - Перед новой валидацией (чтобы убрать старые ошибки)
- *    - При открытии модального окна с формой (чтобы форма была чистой)
- * 5. Примечание: функция не очищает содержимое блока, только скрывает его
- *    При следующей ошибке старое содержимое будет перезаписано
+ * Очищает все визуальные индикаторы с поля
  */
-function hideErrorsForForm(form) {
-    const errorBlock = form.querySelector('.form-errors');
+function clearFieldValidation(field) {
+    const errorBlock = field.parentElement.querySelector('.field-error');
     if (errorBlock) {
-        errorBlock.classList.add('d-none');
+        errorBlock.style.display = 'none';
     }
 }
 
 // =============================================================================
-// ОСНОВНАЯ ФУНКЦИЯ ВАЛИДАЦИИ
+// ВАЛИДАЦИЯ КОНКРЕТНЫХ ПОЛЕЙ
 // =============================================================================
 
 /**
- * Выполняет полную валидацию формы с использованием всех активных проверок
- * 
- * Логика работы:
- * 1. Создаем пустой для сбора всех ошибок
- * 2. Извлекает значения всех полей формы через formData.get():
- *    - user_name - имя пользователя
- *    - email - электронная почта
- *    - tel - номер телефона
- *    - city - название города
- *    - form_timestamp - метка времени открытия формы
- *    Используем оператор || '' чтобы избежать null/undefined
- * 3. Создает массив всех функций валидации и вызывает каждую:
- *    - validateRequiredFields() - проверка обязательных полей
- *    - validateNameCyrillic() - имя только кириллицей
- *    - validateEmailLatin() - email только латиницей
- *    - validatePhoneSameDigits() - нет 6 одинаковых цифр
- *    - validatePhoneSequentialDigits() - нет 6 последовательных цифр
- *    - validateCityCyrillic() - город только кириллицей
- *    - validateRussianOperator() - российский код оператора
- *    - validateHoneypotName() - проверка honeypot поля
- *    - validatePhoneFullLength() - полная длина телефона
- *    - validateFormTimestamp() - время заполнения формы
- * 4. Проходит по результатам всех валидаций:
- *    - Если валидация не прошла (!result.valid) И есть ошибки (result.errors)
- *    - Добавляет все ошибки из этой валидации в общий массив
- * 5. Возвращает итоговый результат:
- *    - valid: true если массив ошибок пустой (все проверки пройдены)
- *    - errors: массив всех собранных сообщений об ошибках
- * 6. Пример результата при ошибках:
- *    {
- *      valid: false,
- *      errors: ['Поле "Имя" обязательно', 'Email некорректен', 'Телефон слишком короткий']
- *    }
- * 7. Пример результата при успехе:
- *    {
- *      valid: true,
- *      errors: []
- *    }
+ * Валидирует поле "Имя"
  */
-function validateForm(form) {
+function validateNameField(field) {
+    const value = field.value;
+    
+    // Проверка на обязательность
+    let result = validateRequired(value);
+    if (!result.valid) {
+        showFieldError(field, result.error);
+        return false;
+    }
+
+    // Проверка на кириллицу
+    result = validateNameCyrillic(value);
+    if (!result.valid) {
+        showFieldError(field, result.error);
+        return false;
+    }
+
+    hideFieldError(field);
+    return true;
+}
+
+/**
+ * Валидирует поле "Email"
+ */
+function validateEmailField(field) {
+    const value = field.value;
+    
+    // Проверка на обязательность
+    let result = validateRequired(value);
+    if (!result.valid) {
+        showFieldError(field, result.error);
+        return false;
+    }
+
+    // Проверка формата email
+    result = validateEmailLatin(value);
+    if (!result.valid) {
+        showFieldError(field, result.error);
+        return false;
+    }
+
+    hideFieldError(field);
+    return true;
+}
+
+/**
+ * Валидирует поле "Телефон"
+ */
+function validatePhoneField(field) {
+    const value = field.value;
+    
+    // Проверка на обязательность
+    let result = validateRequired(value);
+    if (!result.valid) {
+        showFieldError(field, result.error);
+        return false;
+    }
+
+    // Проверка полной длины
+    result = validatePhoneFullLength(value);
+    if (!result.valid) {
+        showFieldError(field, result.error);
+        return false;
+    }
+
+    // Проверка одинаковых цифр
+    result = validatePhoneSameDigits(value);
+    if (!result.valid) {
+        showFieldError(field, result.error);
+        return false;
+    }
+
+    // Проверка последовательных цифр
+    result = validatePhoneSequentialDigits(value);
+    if (!result.valid) {
+        showFieldError(field, result.error);
+        return false;
+    }
+
+    // Проверка российского оператора
+    result = validateRussianOperator(value);
+    if (!result.valid) {
+        showFieldError(field, result.error);
+        return false;
+    }
+
+    hideFieldError(field);
+    return true;
+}
+
+/**
+ * Валидирует поле "Город"
+ */
+function validateCityField(field) {
+    const value = field.value;
+    
+    // Город не обязательное поле, проверяем только если заполнено
+    if (!value || value.trim() === '') {
+        clearFieldValidation(field);
+        return true;
+    }
+
+    // Проверка на кириллицу
+    const result = validateCityCyrillic(value);
+    if (!result.valid) {
+        showFieldError(field, result.error);
+        return false;
+    }
+
+    hideFieldError(field);
+    return true;
+}
+
+/**
+ * Валидирует поле формы в зависимости от его имени
+ */
+function validateField(field) {
+    const fieldName = field.getAttribute('name');
+    
+    switch(fieldName) {
+        case 'user_name':
+            return validateNameField(field);
+        case 'email':
+            return validateEmailField(field);
+        case 'tel':
+            return validatePhoneField(field);
+        case 'city':
+            return validateCityField(field);
+        default:
+            return true;
+    }
+}
+
+/**
+ * Валидирует всю форму перед отправкой
+ */
+function validateFormBeforeSubmit(form) {
     const formData = new FormData(form);
-    var allErrors = []; // Используем var вместо const для совместимости
+    let isValid = true;
 
-    const userName = formData.get('user_name') || '';
-    const email = formData.get('email') || '';
-    const tel = formData.get('tel') || '';
-    const city = formData.get('city') || '';
-    const timestamp = formData.get('form_timestamp') || '';
-
-    const validations = [
-        validateRequiredFields(formData),
-        validateNameCyrillic(userName),
-        validateEmailLatin(email),
-        validatePhoneSameDigits(tel),
-        validatePhoneSequentialDigits(tel),
-        validateCityCyrillic(city),
-        validateRussianOperator(tel),
-        validateHoneypotName(formData),
-        validatePhoneFullLength(tel),
-        validateFormTimestamp(timestamp)
-    ];
-
-    validations.forEach(function (result) {
-        if (!result.valid && result.errors) {
-            // Правильное объединение массивов для старых браузеров
-            for (var i = 0; i < result.errors.length; i++) {
-                allErrors.push(result.errors[i]);
-            }
+    // Валидация всех видимых полей
+    const fields = form.querySelectorAll('input[name="user_name"], input[name="email"], input[name="tel"], input[name="city"]');
+    fields.forEach(function(field) {
+        if (!validateField(field)) {
+            isValid = false;
         }
     });
 
-    return {
-        valid: allErrors.length === 0,
-        errors: allErrors
-    };
+    // Проверка honeypot - если заполнено, блокируем форму (бот)
+    const honeypotResult = validateHoneypotName(formData);
+    if (!honeypotResult.valid) {
+        isValid = false;
+    }
+
+    // Проверка timestamp
+    const timestamp = formData.get('form_timestamp') || '';
+    const timestampResult = validateFormTimestamp(timestamp);
+    if (!timestampResult.valid) {
+        isValid = false;
+        // Показываем ошибку timestamp через alert, т.к. это системная ошибка
+        alert(timestampResult.error);
+    }
+
+    return isValid;
 }
 
 // =============================================================================
@@ -627,46 +709,7 @@ function validateForm(form) {
 // =============================================================================
 
 /**
- * 
  * Инициализирует защиту форм от спама на всех формах страницы с классом 'protected-form'
- * // =============================================================================
- * У ФОРМЫ ДОЛЖЕН БЫТЬ КЛАСС 'protected-form'
- * // =============================================================================
- * 
- * Логика работы:
- * 1. Находит все формы на странице с классом 'protected-form':
- *    - Использует document.querySelectorAll() для поиска всех подходящих форм
- * 2. Если не найдено ни одной формы:
- *    - Прекращает выполнение (return)
- *    - Не выполняет ненужных действий
- * 3. Для каждой найденной формы выполняет настройку:
- * 
- *    A) ИНИЦИАЛИЗАЦИЯ TIMESTAMP:
- *       - Ищет скрытое поле [name="form_timestamp"] внутри формы
- *       - Если поле найдено - записывает текущее время: Date.now()
- *       - Это время открытия формы, используется для защиты от ботов
- * 
- *    B) ОБРАБОТКА МОДАЛЬНЫХ ОКОН:
- *       - Проверяет, находится ли форма внутри Bootstrap модального окна (.modal)
- *       - Если форма в модалке:
- *         * Добавляет обработчик события 'show.bs.modal' (модалка открывается)
- *         * При открытии модалки:
- *           - Обновляет timestamp (время открытия заново)
- *         * Это нужно, т.к. модалка может открываться многократно
- * 
- *    C) ОБРАБОТКА ОТПРАВКИ ФОРМЫ:
- *       - Добавляет обработчик события 'submit' на форму
- *       - При отправке формы:
- *         1. Отменяет стандартную отправку: e.preventDefault()
- *         2. Скрывает старые ошибки: hideErrorsForForm(form)
- *         3. Выполняет валидацию: validateForm(form)
- *         4. Проверяет результат валидации:
- *            - Если есть ошибки (!validation.valid):
- *              * Показывает ошибки пользователю: showErrorsForForm()
- *              * Прерывает отправку: return false
- *            - Если ошибок нет:
- *              * Отправляет форму: this.submit()
- *              * Форма уйдет на сервер обычным способом
  */
 function initFormProtection() {
     const forms = document.querySelectorAll('.protected-form');
@@ -682,29 +725,58 @@ function initFormProtection() {
             timestampField.value = Date.now();
         }
 
+        // Получаем все поля формы для валидации
+        const fields = form.querySelectorAll('input[name="user_name"], input[name="email"], input[name="tel"], input[name="city"]');
+        
+        // Добавляем обработчики на каждое поле
+        fields.forEach(function(field) {
+            // Валидация при потере фокуса
+            field.addEventListener('blur', function() {
+                if (this.value.trim()) validateField(this);
+            });
+
+            // Валидация при вводе - только если уже показана ошибка
+            field.addEventListener('input', function() {
+                const errorBlock = this.parentElement.querySelector('.field-error');
+                if (errorBlock && errorBlock.style.display === 'block') {
+                    validateField(this);
+                }
+            });
+
+            // Очистка ошибки при фокусе на пустое поле
+            field.addEventListener('focus', function() {
+                if (!this.value.trim()) clearFieldValidation(this);
+            });
+        });
+
         // Обработка модальных окон (если форма внутри модалки)
         const modalParent = form.closest('.modal');
         if (modalParent) {
             modalParent.addEventListener('show.bs.modal', function () {
+                // Обновляем timestamp
                 if (timestampField) {
                     timestampField.value = Date.now();
                 }
-                hideErrorsForForm(form);
+                
+                // Очищаем все ошибки и валидацию
+                fields.forEach(function(field) {
+                    clearFieldValidation(field);
+                });
             });
         }
 
         // Обработка отправки формы
         form.addEventListener('submit', function (e) {
             e.preventDefault();
-            hideErrorsForForm(form);
 
-            const validation = validateForm(form);
+            // Валидация всей формы
+            const isValid = validateFormBeforeSubmit(form);
 
-            if (!validation.valid) {
-                showErrorsForForm(form, validation.errors);
+            if (!isValid) {
                 return false;
             }
 
+            // Отправка формы
             this.submit();
         });
     });
@@ -712,7 +784,6 @@ function initFormProtection() {
 
 /**
  * ЗАПУСК ИНИЦИАЛИЗАЦИИ
- * 
  */
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initFormProtection);

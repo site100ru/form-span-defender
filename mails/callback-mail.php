@@ -1,4 +1,5 @@
 <?php
+
 /**
  * ОБРАБОТЧИК ФОРМЫ С ЗАЩИТОЙ ОТ СПАМА
  * Серверная валидация всех данных
@@ -257,6 +258,15 @@ function validateNameCyrillic($name, $config)
         return [
             'valid' => false,
             'errors' => ['Имя должно быть написано только кириллицей']
+        ];
+    }
+
+    // Считаем количество букв кириллицы
+    preg_match_all('/[А-Яа-яЁё]/u', $name, $matches);
+    if (count($matches[0]) < 2) {
+        return [
+            'valid' => false,
+            'errors' => ['Имя должно содержать минимум 2 буквы']
         ];
     }
 
