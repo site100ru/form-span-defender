@@ -1,4 +1,9 @@
 <?php
+// =============================================================================
+// БЛОК WORDPRESS
+// Комментарии ниже нужны если будем переносить на WordPress.
+// В другом случае эти комментарии не повлияют на работу скрипта.
+// =============================================================================
 
 /**
  * Template Name: Статистика форм
@@ -13,7 +18,7 @@
  * Теперь только те, кто знает пароль, смогут просматривать статистику
  */
 
-// // Проверяем, что страница защищена паролем
+// Проверка пароля WordPress (раскомментируйте для использования в WP)
 // if (post_password_required()) {
 //     echo get_the_password_form();
 //     exit;
@@ -125,8 +130,7 @@ function getErrorsStatistics($logFile)
 }
 
 // Получаем период из параметра URL
-$selectedPeriod = isset($_GET['period']) ? sanitize_text_field($_GET['period']) : 'day';
-$stats = getSpamStats($logFile, $selectedPeriod);
+$selectedPeriod = isset($_GET['period']) ? htmlspecialchars(strip_tags($_GET['period'])) : 'day';
 $selectedLimit = isset($_GET['limit']) ? intval($_GET['limit']) : 20;
 $recentAttempts = getAllAttempts($logFile, $selectedLimit);
 $errorStats = getErrorsStatistics($logFile);

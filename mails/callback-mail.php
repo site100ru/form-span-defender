@@ -261,6 +261,15 @@ function validateNameCyrillic($name, $config)
         ];
     }
 
+    // Считаем количество букв кириллицы
+    preg_match_all('/[А-Яа-яЁё]/u', $name, $matches);
+    if (count($matches[0]) < 2) {
+        return [
+            'valid' => false,
+            'errors' => ['Имя должно содержать минимум 2 буквы']
+        ];
+    }
+
     return ['valid' => true];
 }
 

@@ -131,9 +131,6 @@ $message = isset($_SESSION['recaptcha']) ? $_SESSION['recaptcha'] : '';
 
                     <!-- Скрытые поля безопасности -->
                     <input type="hidden" name="form_timestamp" value="" />
-
-                    <!-- Блок ошибок -->
-                    <div class="alert alert-danger d-none form-errors"></div>
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn-lg btn btn-primary mx-auto">
@@ -149,6 +146,12 @@ $message = isset($_SESSION['recaptcha']) ? $_SESSION['recaptcha'] : '';
 
     <!-- Скрипт защиты формы -->
     <script src="js/form-protection.js"></script>
+    <script src="js/inputmask.min.js"></script>
+    <script>
+        var telMask = document.getElementsByClassName("telMask");
+        var im = new Inputmask("+7(999)999-99-99");
+        im.mask(telMask);
+    </script>
 </body>
 
 </html>
