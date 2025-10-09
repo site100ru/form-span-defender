@@ -2,7 +2,7 @@
 if (!session_id()) {
     session_start();
 }
-
+ 
 $display = isset($_SESSION['win']) && $_SESSION['win'] == 'block' ? 'block' : 'none';
 $message = isset($_SESSION['recaptcha']) ? $_SESSION['recaptcha'] : '';
 ?>
